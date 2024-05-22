@@ -11,4 +11,4 @@ const productShema = new Schema<Product>({
   inventory: { type: Object, required: true },
 });
 
-const productModel = model<Product>('Product', productShema);
+export const productModel = model<Product>('Product', productShema);
