@@ -35,6 +35,15 @@ const createOrderIntoDb = async (req: Request, res: Response) => {
   }
 };
 
+const gettAllOrderDb = async (req: Request, res: Response) => {
+  const result = await OrderServices.getAllOrder();
+  res.status(200).json({
+    success: true,
+    message: 'Order fetched successfully',
+    data: result,
+  });
+};
 export const OrderController = {
   createOrderIntoDb,
+  gettAllOrderDb,
 };
