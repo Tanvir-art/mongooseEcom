@@ -43,7 +43,33 @@ const gettAllOrderDb = async (req: Request, res: Response) => {
     data: result,
   });
 };
+
+const findByEmailOrderDb = async (req: Request, res: Response) => {
+  const email = req.query.email as string;
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      message: 'Email query parameter is required',
+    });
+  }
+
+  try {
+    const result = await OrderServices.findByEmailOrder(email);
+    return res.status(200).json({
+      success: true,
+      message: 'Order fetched successfully',
+      data: result,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error,
+    });
+  }
+};
+
 export const OrderController = {
   createOrderIntoDb,
   gettAllOrderDb,
+  findByEmailOrderDb,
 };
