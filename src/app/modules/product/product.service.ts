@@ -51,14 +51,33 @@ const searchProdText = async (searchTerm: string) => {
 };
 
 const decrementProductQuantity = async (id: string, quantity: number) => {
-  const result = await productModel.findByIdAndUpdate(
-    id,
-    {
-      $inc: { 'inventory.quantity': -quantity },
-    },
-    { new: true },
-  );
-  return result;
+  try {
+    // Decrement quantity
+    const product = await productModel.findByIdAndUpdate(
+      id,
+      {
+        $inc: { 'inventory.quantity': -quantity },
+      },
+      { new: true },
+    );
+
+    if (!product) {
+      throw new Error('Product not found');
+    }
+
+    // Set instock to false if quantity is zero or negative
+    if (product.inventory.quantity <= 0) {
+      await productModel.findByIdAndUpdate(
+        id,
+        { $set: { 'inventory.inStock': false } },
+        { new: true },
+      );
+    }
+
+    return product;
+  } catch (error) {
+    throw new Error('Error decrementing product quantity: ' + error);
+  }
 };
 
 export const ProductServices = {
