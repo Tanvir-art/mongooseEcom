@@ -50,6 +50,17 @@ const searchProdText = async (searchTerm: string) => {
   return result;
 };
 
+const decrementProductQuantity = async (id: string, quantity: number) => {
+  const result = await productModel.findByIdAndUpdate(
+    id,
+    {
+      $inc: { 'inventory.quantity': -quantity },
+    },
+    { new: true },
+  );
+  return result;
+};
+
 export const ProductServices = {
   createProductIntoDb,
   getAllProducts,
@@ -57,4 +68,5 @@ export const ProductServices = {
   updateProductInDb,
   deleteProductFromDb,
   searchProdText,
+  decrementProductQuantity,
 };
