@@ -61,37 +61,33 @@ const deleteProduct = async (req: Request, res: Response) => {
   try {
     const { productId } = req.params;
     const result = await ProductServices.deleteProductFromDb(productId);
-    if (result) {
-      res.status(200).json({
-        success: true,
-        message: 'Product deleted successfully',
-        data: null,
-      });
-    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Product deleted successfully',
+      data: null,
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
-const searchProducts = async (req: Request, res: Response) => {
+const searchText = async (req: Request, res: Response) => {
   try {
-    const { searchTerm } = req.query;
+    const searchTerm = req.query.searchTerm;
     if (!searchTerm) {
-      return res.status(400).json({
-        success: false,
-        message: 'Search term is required',
-      });
+      return res.status(400).json({ message: 'Search term is required' });
     }
-    const result = await ProductServices.searchProducts(searchTerm as string);
+
+    const products = await ProductServices.searchProdText(searchTerm as string);
     res.status(200).json({
       success: true,
-      message: `Products matching search term '${searchTerm}' fetched successfully!`,
-      data: result,
+      message: 'Products matching search term  fetched successfully!',
+      data: products,
     });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+  } catch (error) {
+    console.error('Error searching products:', error);
   }
 };
 
@@ -101,5 +97,5 @@ export const ProductController = {
   getSingleProduct,
   updateProduct,
   deleteProduct,
-  searchProducts,
+  searchText,
 };

@@ -13,13 +13,18 @@ const getAllProducts = async () => {
 };
 
 const getSingleProducts = async (id: string) => {
-  // const objectId = new ObjectId(id);
-  const result = await productModel.findById({ _id: id });
-  return result;
+  try {
+    const result = await productModel.findById(id);
+    return result;
+  } catch (error) {
+    throw new Error('Error fetching single product');
+  }
 };
 
 const updateProductInDb = async (id: string, product: Partial<Product>) => {
-  const result = await productModel.findByIdAndUpdate(id, product);
+  const result = await productModel.findByIdAndUpdate(id, product, {
+    new: true,
+  });
   return result;
 };
 
@@ -32,8 +37,8 @@ const deleteProductFromDb = async (id: string) => {
   }
 };
 
-const searchProducts = async (searchTerm: string) => {
-  const regex = new RegExp(searchTerm, 'i'); // 'i' makes it case-insensitive
+const searchProdText = async (searchTerm: string) => {
+  const regex = new RegExp(searchTerm, 'i');
   const result = await productModel.find({
     $or: [
       { name: { $regex: regex } },
@@ -51,5 +56,5 @@ export const ProductServices = {
   getSingleProducts,
   updateProductInDb,
   deleteProductFromDb,
-  searchProducts,
+  searchProdText,
 };
