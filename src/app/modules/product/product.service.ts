@@ -13,12 +13,8 @@ const getAllProducts = async () => {
 };
 
 const getSingleProducts = async (id: string) => {
-  try {
-    const result = await productModel.findById(id);
-    return result;
-  } catch (error) {
-    throw new Error('Error fetching single product');
-  }
+  const result = await productModel.findById(id);
+  return result;
 };
 
 const updateProductInDb = async (id: string, product: Partial<Product>) => {
@@ -30,11 +26,7 @@ const updateProductInDb = async (id: string, product: Partial<Product>) => {
 
 const deleteProductFromDb = async (id: string) => {
   const result = await productModel.deleteOne({ _id: new ObjectId(id) });
-  if (result.deletedCount > 0) {
-    return { _id: id };
-  } else {
-    throw new Error('Product not found');
-  }
+  return result;
 };
 
 const searchProdText = async (searchTerm: string) => {
@@ -51,33 +43,38 @@ const searchProdText = async (searchTerm: string) => {
 };
 
 const decrementProductQuantity = async (id: string, quantity: number) => {
-  try {
-    // Decrement quantity
-    const product = await productModel.findByIdAndUpdate(
+  const product = await productModel.findById(id);
+
+  if (!product) {
+    throw new Error('Product not found');
+  }
+
+  // Check if sufficient quantity is available
+  if (product.inventory.quantity < quantity) {
+    return null;
+  }
+  let Updatedproduct = await productModel.findByIdAndUpdate(
+    id,
+    {
+      $inc: { 'inventory.quantity': -quantity },
+    },
+    { new: true },
+  );
+
+  if (!Updatedproduct) {
+    throw new Error('Product not found');
+  }
+
+  // Set instock to false if quantity is zero
+  if (Updatedproduct.inventory.quantity <= 0) {
+    Updatedproduct = await productModel.findByIdAndUpdate(
       id,
-      {
-        $inc: { 'inventory.quantity': -quantity },
-      },
+      { $set: { 'inventory.quantity': 0, 'inventory.inStock': false } },
       { new: true },
     );
-
-    if (!product) {
-      throw new Error('Product not found');
-    }
-
-    // Set instock to false if quantity is zero or negative
-    if (product.inventory.quantity <= 0) {
-      await productModel.findByIdAndUpdate(
-        id,
-        { $set: { 'inventory.inStock': false } },
-        { new: true },
-      );
-    }
-
-    return product;
-  } catch (error) {
-    throw new Error('Error decrementing product quantity: ' + error);
   }
+
+  return Updatedproduct;
 };
 
 export const ProductServices = {
